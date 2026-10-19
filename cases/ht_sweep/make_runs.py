@@ -27,7 +27,7 @@ BOX_TO_PIPE = math.pi / 4   # pipe/box volume: HemoCell drops cells touching the
 
 def pack(ht, d):
     n = round(ht * V / RBC_VOL / BOX_TO_PIPE)           # RBCs packed in the box
-    subprocess.run([a.packcells, "--rbc", str(n), "--plt", str(round(a.nplt / BOX_TO_PIPE)),
+    subprocess.run([os.path.abspath(a.packcells), "--rbc", str(n), "--plt", str(round(a.nplt / BOX_TO_PIPE)),
                     str(int(L)), str(int(2 * R)), str(int(2 * R))], cwd=d, check=True, stdout=subprocess.DEVNULL)
     return n
 
