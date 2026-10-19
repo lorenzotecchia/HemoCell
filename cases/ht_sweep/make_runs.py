@@ -8,7 +8,7 @@ import argparse, math, os, shutil, subprocess, xml.etree.ElementTree as ET
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--base", default="../../examples/pipeflow")      # dir with pipeflow, tube.stl, *.xml
-ap.add_argument("--packcells", default="../../tools/packCells/build/packCells")
+ap.add_argument("--packcells", default="../../tools/packCells/packCells")
 ap.add_argument("--out", default=f"/projects/prjs2303/{os.environ.get('USER','me')}/ht_sweep")
 ap.add_argument("--ht", type=float, nargs="+", default=[0.05, 0.10, 0.20, 0.30, 0.40])
 ap.add_argument("--nplt", type=int, default=40)          # same PLT count in every run -> only Ht changes
