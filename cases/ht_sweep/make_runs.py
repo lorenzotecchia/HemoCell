@@ -15,6 +15,7 @@ ap.add_argument("--nplt", type=int, default=40)          # same PLT count in eve
 ap.add_argument("--tmax", type=int, default=1_000_000)   # dt=1e-7 s -> 0.1 s; ~44 passes of the 50 um box
 ap.add_argument("--tcsv", type=int, default=5000)        # cell positions (margination data)
 ap.add_argument("--tmeas", type=int, default=5000)       # hdf5 for ParaView: 200 frames over the run
+ap.add_argument("--account", default="ltecchia")
 ap.add_argument("--ntasks", type=int, default=16)
 ap.add_argument("--time", default="24:00:00")
 a = ap.parse_args()
@@ -48,7 +49,7 @@ for ht in a.ht:
 
 open(f"{a.out}/submit.sh", "w").write(f"""#!/bin/bash
 #SBATCH -J ht_sweep
-#SBATCH --account prjs2303
+#SBATCH --account {a.account}
 #SBATCH --partition rome
 #SBATCH --ntasks {a.ntasks}
 #SBATCH --time {a.time}
