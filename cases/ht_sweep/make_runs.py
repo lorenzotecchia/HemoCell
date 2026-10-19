@@ -60,5 +60,10 @@ RUNS=({' '.join(names)})
 cd {a.out}/${{RUNS[$SLURM_ARRAY_TASK_ID]}}
 # resubmitting the same array resumes from the last checkpoint (checkpoint.xml replaces config.xml as argv[1])
 if [ -f output/checkpoint/checkpoint.xml ]; then srun ./pipeflow output/checkpoint/checkpoint.xml; else srun ./pipeflow config.xml; fi
+
+# convert hdf5 -> .xmf for ParaView (needs numpy + h5py)
+module load 2025 SciPy-bundle h5py 2>/dev/null
+python3 -c "import h5py, numpy" 2>/dev/null || pip install --user h5py numpy
+(cd output && {os.path.abspath('../../scripts/batchPostProcess.sh')})
 """)
 print(f"sbatch {a.out}/submit.sh")
