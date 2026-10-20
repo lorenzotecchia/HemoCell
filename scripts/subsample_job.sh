@@ -7,7 +7,8 @@ set -e
 RUN=$(cd "${1:?run dir}" && pwd)
 ROOT=$(pwd)
 EVERY=${EVERY:-20}; NOFLUID=${NOFLUID:-}
-sbatch -J pipe_subset -A ${ACCOUNT:-ltecchia} -p rome -n 1 -t ${TIME:-04:00:00} -o "$RUN/subset-%j.out" <<EOF
+JOB=$RUN/subsample_run.sh   # debug by hand with: bash -x $JOB
+cat > "$JOB" <<EOF
 #!/bin/bash
 module load 2025 SciPy-bundle h5py
 python3 -c 'import h5py, numpy' 2>/dev/null || pip install --user h5py numpy
@@ -25,3 +26,4 @@ echo "linked \$(ls \$S/hdf5 | wc -l) snapshots"
 cd \$S && $ROOT/scripts/batchPostProcess.sh
 ls \$S/*.xmf
 EOF
+sbatch -J pipe_subset -A ${ACCOUNT:-ltecchia} -p rome -n 1 -t ${TIME:-04:00:00} -o "$RUN/subset-%j.out" "$JOB"
