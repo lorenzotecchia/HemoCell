@@ -9,9 +9,9 @@ ROOT=$(pwd)
 EVERY=${EVERY:-20}; NOFLUID=${NOFLUID:-}
 sbatch -J pipe_subset -A ${ACCOUNT:-ltecchia} -p rome -n 1 -t ${TIME:-04:00:00} -o "$RUN/subset-%j.out" <<EOF
 #!/bin/bash
-set -e
-module load 2025 SciPy-bundle h5py 2>/dev/null
+module load 2025 SciPy-bundle h5py
 python3 -c 'import h5py, numpy' 2>/dev/null || pip install --user h5py numpy
+set -ex
 OUT=\$(ls -d $RUN/output* | head -1)   # ponytail: first output dir; set it by hand if there are several
 S=$RUN/subset; rm -rf \$S; mkdir -p \$S/hdf5
 for snap in \$(ls \$OUT/hdf5 | head -n -1 | awk 'NR%$EVERY==1'); do
