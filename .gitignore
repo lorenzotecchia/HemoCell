@@ -59,6 +59,11 @@ rules.ninja
 /cases/stent_strut/stent_strut_crossings/stent_strut_crossings
 /cases/stentflow/stentflow
 /cases/stl_preinlet/stl_preinlet
+/cases/vessel_geometries/vessel_geometries
+/cases/vessel_geometries/output_*/
+/cases/vessel_geometries/*.stl
+/cases/vessel_geometries/*.pos
+/cases/vessel_geometries/*.log
 /cases/stretchCell_interior_viscosity/stretchCell_interior_viscosity
 /cases/stretchMalaria/stretchMalaria
 /cases/unbounded/unbounded

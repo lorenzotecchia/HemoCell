@@ -57,6 +57,7 @@ PREPARE = {
 SKIP = {
     'examples/cube': 'needs a generated configuration (examples/cube/preprocess)',
     'cases/performance_testing': 'performance configurations in configs/, not a smoke test',
+    'cases/vessel_geometries': 'needs generated STLs and positions (run_preview.sh); takes no steps',
 }
 
 # Drivers that take minutes even for a short run, run only with --slow.

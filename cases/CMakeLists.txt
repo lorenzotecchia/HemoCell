@@ -31,6 +31,7 @@ set(HEMOCELL_CASES
   "stretchMalaria"
   "unbounded"
   "vasoconstriction_pipe"
+  "vessel_geometries"
 )
 # The target of each directory is named after its last component.
 set(HEMOCELL_CASE_TARGETS "")

@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<hemocell>
+
+<verbose>
+    <cellsDeletedInfo>0</cellsDeletedInfo>
+</verbose>
+
+<parameters>
+    <outputDirectory>output_curved</outputDirectory> <!-- appended with _x when it already exists -->
+    <logDirectory>log</logDirectory>
+    <logFile>logfile</logFile>
+</parameters>
+
+<domain>
+    <geometry> curved.stl </geometry> <!-- from scripts/geometry/make_vessels.py, in um, bbox starting at 0 -->
+    <fluidEnvelope> 2 </fluidEnvelope>
+    <rhoP> 1025 </rhoP>   <!-- plasma density [kg/m^3] -->
+    <nuP> 1.1e-6 </nuP>   <!-- plasma kinematic viscosity [m^2/s] -->
+    <dx> 5e-7 </dx>       <!-- lattice spacing [m] -->
+    <dt> 1e-7 </dt>       <!-- time step [s] -->
+    <refDir> 0 </refDir>  <!-- x, the flow axis -->
+    <refDirN> 200 </refDirN> <!-- STL x extent / dx = 100 um / 0.5 um: 1 lattice node per dx -->
+    <blockSize> -1 </blockSize>
+    <kBT> 4.100531391e-21 </kBT> <!-- [J], T = 300 K -->
+    <particleEnvelope> 25 </particleEnvelope>
+</domain>
+
+</hemocell>
