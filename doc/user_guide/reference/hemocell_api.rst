@@ -206,5 +206,5 @@ Running and load balancing
      - Rebalance / restructure the domain across processes. See
        :ref:`concepts/parallelism:Load balancing`. Requires a build with
        ParMETIS (``hemocell_parmetis``); without it ``doRestructure()`` only
-       prints a warning. Not supported together with a pre-inlet or the
-       CEPAC field.
+       prints a warning. With a pre-inlet only the main domain is balanced.
+       Not supported together with the CEPAC field.

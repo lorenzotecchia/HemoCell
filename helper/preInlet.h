@@ -99,6 +99,15 @@ public:
     initializePreInletVelocityBoundary();
     initializePreInletParticleBoundary();
   };
+  /**
+   * @brief Rebuild the pre-inlet <-> domain exchange plans after the domain
+   * blocks moved to other ranks (load balancing). Collective: all ranks.
+   *
+   * The particle partners are recomputed at once, the velocity plan at the
+   * next applyPreInletVelocityBoundary(). The boundary conditions themselves
+   * are part of the lattice (and its checkpoint) and are not touched.
+   */
+  void resetCommunication();
 
   void autoPreinletFromBoundary(Direction);
   void preInletFromSlice(Direction direction_, plb::Box3D boundary);

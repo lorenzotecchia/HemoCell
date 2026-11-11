@@ -58,9 +58,8 @@ public:
 
   //Functionals for gathering data
   struct TOAB_t {
-    double fluid_time;
-    double particle_time;
-    int n_lsp;
+    int n_lsp;   // surface particles in the block (load measure)
+    int n_fluid; // fluid (non-boundary) nodes of the block
     int mpi_proc;
   };
   struct Box3D_simple {
@@ -91,6 +90,13 @@ private:
   bool original_block_stored = true;
   plb::SparseBlockStructure3D * original_block_structure = 0;
   plb::ThreadAttribution * original_thread_attribution = 0;
+  /// Iteration of the last checkpoint written by doLoadBalance() (-1: none).
+  plint checkpointSavedAt = -1;
+#ifdef HEMO_PARMETIS
+  /// Replace the domain lattice and the particle fields by ones with the given
+  /// block distribution and reload the checkpoint into them. Collective.
+  void replaceDomainLattice(plb::SparseBlockStructure3D const & structure, plb::ThreadAttribution const & attribution);
+#endif
 };
 }
 #endif

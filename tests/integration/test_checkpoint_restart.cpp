@@ -2,8 +2,8 @@
 #include "pipeflow_setup.h"
 #include "cellInfo.h"
 
-#include <sys/stat.h>
-
+#include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <memory>
 #include <sstream>
@@ -20,9 +20,10 @@ namespace {
 
 // Modification time of a file in nanoseconds (0 if it does not exist).
 long long modificationTime(const std::string & path) {
-  struct stat st;
-  if (stat(path.c_str(), &st) != 0) { return 0; }
-  return (long long)st.st_mtim.tv_sec * 1000000000LL + st.st_mtim.tv_nsec;
+  std::error_code ec;
+  auto t = std::filesystem::last_write_time(path, ec);
+  if (ec) { return 0; }
+  return std::chrono::duration_cast<std::chrono::nanoseconds>(t.time_since_epoch()).count();
 }
 
 // Run the pipeflow case for 10 iterations and save a checkpoint; returns the

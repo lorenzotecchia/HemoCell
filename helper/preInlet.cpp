@@ -492,6 +492,13 @@ void PreInlet::applyPreInletVelocityBoundary() {
   global.statistics.getCurrent().stop();
 }
 
+void PreInlet::resetCommunication() {
+  initializePreInletParticleBoundary();
+  velocityExchangeReady = false;
+  velocitySendNodes.clear();
+  velocityRecvNodes.clear();
+}
+
 void PreInlet::initializePreInletVelocityBoundary() {
   OnLatticeBoundaryCondition3D<T, DESCRIPTOR> * bc = createZouHeBoundaryCondition3D<T, DESCRIPTOR>();
   Box3D domain;

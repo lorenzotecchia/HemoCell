@@ -10,11 +10,16 @@ Features with restrictions
 
 Load balancing
    ``doLoadBalance()``/``doRestructure()`` need the ParMETIS build
-   (``hemocell_parmetis``), which currently does not compile: the
-   per-block timers it reads were dropped from the Palabos patch. Without
-   ParMETIS, ``doRestructure()`` only prints a warning. It is not supported
-   together with a pre-inlet or the CEPAC field, and has not been tested since
-   its fixes.
+   (``hemocell_parmetis``); without it ``doRestructure()`` only prints a
+   warning. Not supported together with the CEPAC field; with a pre-inlet only
+   the main domain is balanced. Only data processors acting on the fluid
+   lattice alone are moved to the re-created lattice. The block weights are
+   counts (fluid nodes, surface particles), not measured times. Tested on
+   ``pipeflow`` and ``pipeflow_with_preinlet`` (up to 4 ranks, 12 blocks),
+   not on large cases. A balance is a checkpoint save and reload, so it is as
+   exact as a restart: with a pre-inlet, cells partly transferred into the
+   domain at that moment are deleted on load and sent again at the next
+   pre-inlet update (differences of about 1e-9 m/s in cell velocities).
 
 Lees-Edwards boundary condition
    Only correct when the blocks on both sides of the shearing (z) boundary are

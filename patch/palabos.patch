@@ -798,6 +798,17 @@ diff -ruN a/src/multiGrid/multiGridParameterManager.hh b/src/multiGrid/multiGrid
  { }
  
  template <typename T>
+--- a/src/offLattice/offLatticeBoundaryCondition3D.hh	2026-11-08 12:01:02
++++ b/src/offLattice/offLatticeBoundaryCondition3D.hh	2026-11-08 12:01:02
+@@ -98,7 +98,7 @@
+ template <typename T, template <typename U> class Descriptor, class BoundaryType>
+ OffLatticeBoundaryCondition3D<T, Descriptor, BoundaryType>::OffLatticeBoundaryCondition3D(
+     OffLatticeBoundaryCondition3D<T, Descriptor, BoundaryType> const &rhs) :
+-    offLatticeModel(rhs.offLatticeModel.clone()),
++    offLatticeModel(rhs.offLatticeModel->clone()),
+     voxelizedDomain(rhs.voxelizedDomain),
+     lattice(rhs.lattice),
+     boundaryShapeArg(rhs.boundaryShapeArg),
 diff -ruN a/src/parallelism/parallelBlockCommunicator3D.cpp b/src/parallelism/parallelBlockCommunicator3D.cpp
 --- a/src/parallelism/parallelBlockCommunicator3D.cpp	2022-06-13 13:12:01.000000000 +0200
 +++ b/src/parallelism/parallelBlockCommunicator3D.cpp	2026-08-01 14:52:37.240729523 +0200

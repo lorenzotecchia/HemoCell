@@ -58,6 +58,20 @@ relevant case-level controls are
 ``HemoCell::doRestructure()``, together with the ``<sim><tbalance>``
 interval.
 
+``calculateFractionalLoadImbalance()`` returns max/average - 1 of the surface
+particles per process. ``doLoadBalance()`` saves a checkpoint, partitions the
+atomic blocks with ParMETIS so that both the fluid nodes and the surface
+particles are balanced, re-creates the fluid lattice and the particle fields
+with that distribution and reloads the checkpoint into them; it keeps the
+current distribution when the new one is not better. ``doRestructure()`` then
+merges adjacent blocks of the same process. All ranks must call them, at the
+same iteration. Blocks are only moved, never split, so balancing needs several
+atomic blocks per process (``<domain><mABx>``, ``mABy``, ``mABz``); with the
+default of one block per process it has nothing to gain. With a pre-inlet only
+the main domain is balanced, over its own processes; the pre-inlet keeps its
+distribution. ``examples/pipeflow_with_preinlet`` balances every ``tbalance``
+iterations when built with ParMETIS.
+
 .. note::
 
    Load balancing relies on the optional ``Parmetis`` dependency and a
