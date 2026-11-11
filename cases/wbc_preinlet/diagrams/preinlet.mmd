@@ -1,0 +1,32 @@
+sequenceDiagram
+  autonumber
+  participant D as Driver (pipeflow_with_preinlet.cpp)
+  participant H as HemoCell
+  participant P as PreInlet
+  participant PR as Pre-inlet ranks (0..nProcs-1)
+  participant DR as Domain ranks (nProcs..size-1)
+  D->>H: getFlagMatrixFromSTL(cfg) — voxelise STL
+  D->>P: new PreInlet(&hemocell, flagMatrix)
+  D->>P: preInletFromSlice(Xpos, slice with x0 = x1)
+  Note over P: slice must be flat. Finds the inlet fluid box,<br/>location = box extended by preinlet_length (lengthN)
+  D->>H: initializeLattice(management)
+  Note over H: rank split: nProcs = pABx·pABy·pABz<br/>or size × (pre-inlet nodes / total nodes)<br/>sets partOfpreInlet per rank
+  H-->>PR: partOfpreInlet = true
+  H-->>DR: partOfpreInlet = false (periodicity off)
+  D->>P: initializePreInlet() — exchange plans, MPI_Comm_dup
+  D->>H: boundaryFromFlagMatrix(...)
+  D->>P: createBoundary() — pre-inlet periodic along the flow
+  D->>P: calculateDrivingForce()
+  D->>H: initializeCellfield(), addCellType RBC / PLT / WBC
+  D->>H: outlet = Zou/He pressure plane at x0 (domain ranks)
+  D->>H: loadParticles() — .pos positions are relative to the pre-inlet
+  loop every step
+    D->>H: iterate()
+    PR->>P: setDrivingForce() (body force in the pre-inlet only)
+    D->>P: applyPreInlet()
+    PR->>DR: particles in the inflow slab (width = particleEnvelope)
+    PR->>DR: inlet-node velocities → Zou/He velocity BC of the domain
+    opt HEMO_PARMETIS and iter % tbalance == 0 and FLI > maxFlin
+      D->>H: doLoadBalance() + doRestructure() (domain ranks only)
+    end
+  end

@@ -1,0 +1,23 @@
+flowchart TD
+  A["HemoCell::iterate()<br/>core/hemoCell.cpp:377"] --> S["sanityCheck() once<br/>build large_communicator if missing"]
+  S --> R{"repulsion step?<br/>iter % repulsionTimescale"}
+  R -- yes --> R1["applyRepulsionForce /<br/>applyBoundaryRepulsionForce<br/>capRepulsionForce (FORCE_LIMIT)"]
+  R -- no --> F
+  R1 --> F["1. spreadParticleForce()<br/>vertex force → fluid (IBM)"]
+  F --> L["2. lattice->collideAndStream()<br/>LBM step"]
+  L --> V{"iter % particleVelocityUpdateTimescale<br/>(stepParticleEvery)"}
+  V -- yes --> V1["3. interpolateFluidVelocity()<br/>fluid → vertex velocity"]
+  V1 --> V2["4. syncEnvelopes()<br/>MPI: halo particle copies"]
+  V2 --> P
+  V -- no --> P["5. advanceParticles()<br/>x += v·dt"]
+  P --> M["6. applyConstitutiveModel()<br/>CellMechanics::ParticleMechanics<br/>(RBC / PLT / WBC force laws)"]
+  M --> IV{"INTERIOR_VISCOSITY<br/>build only"}
+  IV -. "variant" .-> IV1["findInternalParticleGridPoints<br/>internalGridPointsMembrane<br/>(uses vertex normalDirection)"]
+  IV --> D{"velocity-update step?"}
+  IV1 --> D
+  D -- yes --> D1["deleteBrokenCells()<br/>deleteNonLocalParticles()"]
+  D -- no --> E
+  D1 --> E["clear lattice force, iter++"]
+  E --> DRV["back in driver:<br/>re-apply driving force<br/>preInlet->applyPreInlet()<br/>output / checkpoint / balance"]
+  classDef mpi fill:#fde2e1,stroke:#c0392b;
+  class V2,D1 mpi;

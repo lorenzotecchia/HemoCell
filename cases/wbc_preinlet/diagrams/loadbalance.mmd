@@ -1,0 +1,26 @@
+flowchart TD
+  T{"driver: iter % tbalance == 0<br/>(HEMO_PARMETIS build)"} -->|yes| F["calculateFractionalLoadImbalance()<br/>max/avg − 1 of surface particles per domain rank<br/>(nan while the domain has no cells)"]
+  F --> C{"FLI > maxFlin?"}
+  C -- no --> X["continue"]
+  C -- yes --> B["doLoadBalance() — all ranks, same iter"]
+  B --> G{"≥ 2 domain ranks and<br/>blocks ≥ domain ranks?<br/>(mABx·mABy·mABz)"}
+  G -- "no: return" --> RS
+  G -- yes --> S["saveCheckPoint()"]
+  S --> O["replaceDomainLattice(original blocks)<br/>recompute FLI"]
+  O --> PM["ParMETIS_V3_PartKway<br/>weights: n_fluid, n_lsp per block"]
+  PM --> W{"new distribution better?"}
+  W -- no --> K["keep current layout"]
+  W -- yes --> RL["replaceDomainLattice(new attribution)"]
+  subgraph RDL ["replaceDomainLattice()  helper/loadBalancer.cpp:356"]
+    direction TB
+    R1["new MultiBlockLattice3D, copy periodicity<br/>+ lattice-only data processors"] --> R2["recreate particle fields<br/>createParticleField()"]
+    R2 --> R3["reloadCheckpoint()"]
+    R3 --> R4["preInlet->resetCommunication()<br/>rebuild pre-inlet ↔ domain plans"]
+  end
+  RL --> R1
+  O -.-> R1
+  K --> RS
+  R4 --> RS["doRestructure() — always called next by the driver<br/>merge adjacent blocks of the same rank<br/>(checkpoint reused if same iter)"]
+  RS --> X
+  classDef mpi fill:#fde2e1,stroke:#c0392b;
+  class B,S,R3,RS mpi;

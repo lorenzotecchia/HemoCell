@@ -1,0 +1,77 @@
+classDiagram
+  direction LR
+  class HemoCell {
+    +Config* cfg
+    +MultiBlockLattice3D* lattice
+    +lattice / preinlet_lattice / domain_lattice
+    +HemoCellFields* cellfields
+    +PreInlet* preInlet
+    +LoadBalancer* loadBalancer
+    +bool partOfpreInlet
+    +iterate()
+    +addCellType~Mechanics~(name, shape)
+    +loadParticles() / writeOutput()
+    +saveCheckPoint() / loadCheckPoint()
+  }
+  class HemoCellFields {
+    +vector~HemoCellField*~ cellFields
+    +MultiParticleField3D* immersedParticles
+    +preinlet_ / domain_immersedParticles
+    +spreadParticleForce()
+    +interpolateFluidVelocity()
+    +syncEnvelopes()
+    +applyConstitutiveModel()
+  }
+  class HemoCellField {
+    +string name  (RBC / PLT / WBC)
+    +TriangularSurfaceMesh* meshElement
+    +Config* materialCfg  (NAME.xml)
+    +CellMechanics* mechanics
+    +minimumDistanceFromSolid [um]
+    +timescale (stepMaterialEvery)
+  }
+  class HemoCellParticleField {
+    <<AtomicBlock3D, one per block>>
+    +vector~HemoCellParticle~ particles
+    +particles_per_cell (lpc cache)
+    +applyRepulsionForce()
+  }
+  class HemoCellParticle {
+    +serializeValues_t sv  (pos, vel, force, cellId, vertexId)
+    +force_* pointers (alias sv.force)
+  }
+  class CellMechanics {
+    <<abstract>>
+    +ParticleMechanics(particles_per_cell, cellConstants, ctype)
+    +statistics()
+  }
+  class RbcHighOrderModel
+  class PltSimpleModel
+  class WbcHighOrderModel {
+    +k_inner_rigid, k_cytoskeleton
+    +core_radius, radius
+    +normals for INTERIOR_VISCOSITY (3de23e1)
+  }
+  class PreInlet {
+    +Box3D location
+    +Direction direction
+    +nProcs
+    +applyPreInlet()
+    +resetCommunication()
+  }
+  class LoadBalancer {
+    +calculateFractionalLoadImbalance()
+    +doLoadBalance()
+    +restructureBlocks()
+    -replaceDomainLattice()
+  }
+  HemoCell *-- HemoCellFields
+  HemoCell *-- PreInlet
+  HemoCell *-- LoadBalancer
+  HemoCellFields "1" *-- "n types" HemoCellField
+  HemoCellFields "1" *-- "n blocks" HemoCellParticleField : via immersedParticles
+  HemoCellParticleField *-- HemoCellParticle
+  HemoCellField *-- CellMechanics
+  CellMechanics <|-- RbcHighOrderModel
+  CellMechanics <|-- PltSimpleModel
+  CellMechanics <|-- WbcHighOrderModel

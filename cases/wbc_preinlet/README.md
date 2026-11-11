@@ -125,3 +125,29 @@ in the checkpoint, not `config.xml`.
   indices above about 16k domain ranks x 8 blocks.
 - The imbalance is `nan` while the domain has no cells; no balance runs then.
 - `WBC.xml` (from `cases/pipeflow_wbc`) has uncalibrated inner links.
+
+## How the code fits together (diagrams)
+
+SVGs in `diagrams/`, with their Mermaid sources (`*.mmd`; edit and re-render
+with mermaid.live or `mmdc -i x.mmd -o x.svg`).
+
+- `iterate.svg`: one `HemoCell::iterate()` step (`core/hemoCell.cpp:377`).
+  Force spreading, LBM, then velocity interpolation and the MPI envelope sync
+  every `stepParticleEvery`, particle advance, mechanics, cell cleanup. The
+  driver re-applies the driving force and calls `applyPreInlet()` after it.
+- `preinlet.svg`: set-up order and per-step exchange of the pre-inlet. The
+  first `nProcs` ranks run the periodic pre-inlet (body force), the rest the
+  domain. Each step the pre-inlet sends the particles in a slab
+  `particleEnvelope` wide and the inlet-node velocities (Zou/He velocity BC on
+  the domain). Outlet: Zou/He pressure plane at `x0`.
+- `classes.svg`: ownership. `HemoCell` → `HemoCellFields` → one
+  `HemoCellField` per cell type (mesh, `NAME.xml`, `CellMechanics`) and one
+  `HemoCellParticleField` per atomic block (the vertices).
+- `loadbalance.svg`: `doLoadBalance()` = checkpoint, ParMETIS on fluid-node and
+  vertex counts, re-create the domain lattice and particle fields, reload,
+  `PreInlet::resetCommunication()`. `doRestructure()` always follows.
+
+WBC model on `dev` (`3de23e1`, colleagues): `WbcHighOrderModel` now
+accumulates area-weighted outward vertex normals (`normalDirection`) when built
+with `INTERIOR_VISCOSITY`, which the interior-viscosity step uses to find the
+fluid nodes inside the membrane. No effect on the base `hemocell` library.
