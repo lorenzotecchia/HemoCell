@@ -165,6 +165,9 @@ int main(int argc, char * argv[]) {
     if (hemocell.iter % tcheckpoint == 0) { hemocell.saveCheckPoint(); }
   }
 
+  hemo::global.statistics.printStatistics();
+  hemo::global.statistics.outputStatistics();
+
   hlog << "(main) Simulation finished :) " << endl;
 
   return 0;

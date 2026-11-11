@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <helper/voxelizeDomain.h>
 #include "rbcHighOrderModel.h"
 #include "pltSimpleModel.h"
+#include "wbcHighOrderModel.h"
 #include "cellInfo.h"
 #include "fluidInfo.h"
 #include "particleInfo.h"
@@ -102,6 +103,10 @@ int main(int argc, char * argv[]) {
   hemocell.addCellType<PltSimpleModel>("PLT", ELLIPSOID_FROM_SPHERE);
   hemocell.setMaterialTimeScaleSeparation("PLT", (*cfg)["ibm"]["stepMaterialEvery"].read<int>());
 
+  hemocell.addCellType<WbcHighOrderModel>("WBC", WBC_SPHERE);
+  hemocell.setMaterialTimeScaleSeparation("WBC", (*cfg)["ibm"]["stepMaterialEvery"].read<int>());
+  hemocell.setInitialMinimumDistanceFromSolid("WBC", 1); //Micrometer! not LU
+
   hemocell.setParticleVelocityUpdateTimeScaleSeparation((*cfg)["ibm"]["stepParticleEvery"].read<int>());
 
   //hemocell.setRepulsion((*cfg)["domain"]["kRep"].read<double>(), (*cfg)["domain"]["RepCutoff"].read<double>());
@@ -111,6 +116,7 @@ int main(int argc, char * argv[]) {
                          OUTPUT_FORCE_BENDING, OUTPUT_FORCE_LINK, OUTPUT_FORCE_AREA, OUTPUT_FORCE_VISC};
   hemocell.setOutputs("RBC", outputs);
   hemocell.setOutputs("PLT", outputs);
+  hemocell.setOutputs("WBC", outputs);
 
   outputs = {OUTPUT_VELOCITY, OUTPUT_DENSITY, OUTPUT_FORCE, OUTPUT_BOUNDARY};
   hemocell.setFluidOutputs(outputs);
@@ -164,20 +170,20 @@ int main(int argc, char * argv[]) {
 
     hemocell.preInlet->applyPreInlet();
 
-    // Load-balancing! Only enable if PARMETIS build is available
-    /*
-     if (hemocell.iter % tbalance == 0) {
-       if(hemocell.calculateFractionalLoadImbalance() > (*cfg)["parameters"]["maxFlin"].read<double>()) {
-         hemocell.doLoadBalance();
-         hemocell.doRestructure();
-       }
-     }
-   */
+#ifdef HEMO_PARMETIS
+    // Balance the domain blocks over the domain ranks (the pre-inlet keeps its own).
+    if (hemocell.iter % tbalance == 0 &&
+        hemocell.calculateFractionalLoadImbalance() > (*cfg)["parameters"]["maxFlin"].read<double>()) {
+      hemocell.doLoadBalance();
+      hemocell.doRestructure();
+    }
+#endif
     if (hemocell.iter % tmeas == 0) {
       pcout << "(main) Stats. @ " << hemocell.iter << " (" << hemocell.iter * param::dt << " s):" << endl;
       pcout << "\t # of cells: " << CellInformationFunctionals::getTotalNumberOfCells(&hemocell);
       pcout << " | # of RBC: " << CellInformationFunctionals::getNumberOfCellsFromType(&hemocell, "RBC");
-      pcout << ", PLT: " << CellInformationFunctionals::getNumberOfCellsFromType(&hemocell, "PLT") << endl;
+      pcout << ", PLT: " << CellInformationFunctionals::getNumberOfCellsFromType(&hemocell, "PLT");
+      pcout << ", WBC: " << CellInformationFunctionals::getNumberOfCellsFromType(&hemocell, "WBC") << endl;
       FluidStatistics finfo = FluidInfo::calculateVelocityStatistics(&hemocell);
       double toMpS = param::dx / param::dt;
       pcout << "\t Velocity  -  max.: " << finfo.max * toMpS << " m/s, mean: " << finfo.avg * toMpS
