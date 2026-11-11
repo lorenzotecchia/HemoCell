@@ -88,7 +88,7 @@ notes in the README:
 
 ## Phase 2 (tonight): static packing in 3 geometries
 
-- [ ] `scripts/geometry/make_vessels.py`: a PEP 723 header so `uv run` brings `trimesh`,
+- [x] `scripts/geometry/make_vessels.py`: a PEP 723 header so `uv run` brings `trimesh`,
       `manifold3d` and `numpy` (no repo dependency). Output STL in µm. Each geometry has a straight
       inlet stub along +x for the pre-inlet later.
   - `bifurcation`: parent D, daughters by Murray's law (D_d = D / 2^(1/3)), half-angle θ
@@ -96,18 +96,23 @@ notes in the README:
   - `curved`: S-bend (two torus arcs), bend radius R
   - Self-check: `assert mesh.is_watertight and mesh.is_winding_consistent`, plus the printed bbox
     in µm.
-- [ ] Static driver `cases/vessel_geometries/` copied from `examples/pipeflow/`: add the WBC
+- [x] Static driver `cases/vessel_geometries/` copied from `examples/pipeflow/`: add the WBC
       registration (the three lines already in `pipeflow_with_preinlet.cpp`), remove
       `setSystemPeriodicity(0, true)` and the forcing warmup, and keep the
       `printStatistics/outputStatistics` lines. Register it in `cases/CMakeLists.txt` and add it to
       `.gitignore`.
-- [ ] One config per geometry (`config_bifurcation.xml`, ...): `<geometry>`,
+- [x] One config per geometry (`config_bifurcation.xml`, ...): `<geometry>`,
       `refDirN` = extent_µm / dx_µm, `tmax 0`. Verify how the voxelizer maps the STL bbox to the
       lattice origin before packing (`helper/voxelizeDomain.cpp`).
-- [ ] Pack the bbox: `tools/packCells/packCells Lx Ly Lz --hematocrit 0.3 --wbc 2 --seed 1` (build
+- [x] Pack the bbox: `tools/packCells/packCells Lx Ly Lz --hematocrit 0.3 --wbc 2 --seed 1` (build
       with Homebrew libomp, as in the README). Check `placed N of M` in the log.
-- [ ] Run `mpirun -n 4 ./vessel_geometries config_<geom>.xml`, then open `RBC.xmf`, `WBC.xmf`,
+- [x] Run `mpirun -n 4 ./vessel_geometries config_<geom>.xml`, then open `RBC.xmf`, `WBC.xmf`,
       `PLT.xmf` and `Fluid.xmf` (Threshold on `Boundary`) in ParaView 6.1.
+
+- [ ] Follow-up: lumen haematocrit is only ~0.07 (box packing, wall cells dropped) and 1-2 WBC per
+      geometry. Either feed the cells from a pre-inlet (Phase 4) or teach packCells the lumen.
+- [ ] Follow-up: the bifurcation junction still narrows to 0.89 R (union of circular tubes); a
+      smooth-blended (SDF) junction would remove it.
 
 ## Phase 3: profiling
 
@@ -128,6 +133,7 @@ notes in the README:
 - [ ] Pick the vessel scale per thesis question (margination / partitioning), and size the
       pre-inlet length for the cell count.
 - [ ] Scale-up on Snellius with the `snellius-personal` scripts.
+- [ ] Small upstream PR: stray pasted text in the licence comment of `helper/voxelizeDomain.cpp:16`.
 - [ ] Small upstream PR for `REVIEW_v3.0.md` findings #1 (zero interval SIGFPE) and #2
       (uninitialised `nCells`).
 - [x] Copy this checklist into `cases/wbc_preinlet/PLAN.md` so it lives with the work.
